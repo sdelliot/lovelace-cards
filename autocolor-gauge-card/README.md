@@ -6,6 +6,7 @@ This card differs in three key ways:
 1. It is not limited to three severity levels. Rather it enables a variable number of sections.
 2. The user can define a start and end color and the color for each segment will be automatically generated.
 3. Enables a gauge for non-numeric values (e.g. low, medium, high).
+4. Enables creating a header for the gauge.
 
 
 **Options**
@@ -17,10 +18,11 @@ This card differs in three key ways:
 | measurement | string | optional | If not set, uses the `unit_of_measurement` on the entity or an empty string if `unit_of_measurement` does not exist.
 | entity | string | **Required** | `sensor.my_temperature`
 | attribute | string | optional | If set, this attribute of the entity is used, instead of its state
-| min | number | 0 | Minimum value for graph
-| max | number | 100 | Maximum value for graph
-| scale | string | '50px' | Base value for graph visual size
-| section | object | optional | Section object. See below
+| min | number | 0 | Minimum value for graph.
+| max | number | 100 | Maximum value for graph.
+| scale | string | '50px' | Base value for graph visual size.
+| header | object | optional | Add a header to the card. A user can either specify the value `true` or one or more of the Header object parameters (described below).
+| section | object | optional | Section object. See below.
 | startColor | object | optional | starColor object. Default start color is Green rgb(0, 255, 0). See below for more details.
 | endColor | object | optional | endColor object. Default endColor is Red rgb(255, 0, 0) See below for more details.
 
@@ -38,6 +40,13 @@ startColor and endColor objects
 | g    | number | **Required** | The Green RGB value of your color.
 | b    | number | **Required** | The Blue RGB value of your color.
 
+
+Header object
+
+| Name | Type | Default | Description
+| ---- | ---- | ------- | -----------
+| icon | String | The entities icon  | The icon to use in the card header. If not provided, the icon is pulled from the provided entity.
+| attribute | String | The entities friendly_name  | Specify an attribute to use as the header. If not provided, the card header will be is pulled from the provided entities friendly_name.
 
 **Example**
 
@@ -61,6 +70,54 @@ Using multiple sections alternative
   title: Pollen Level
   entity: entity: sensor.allergy_index_forecasted_average
   attribute: rating
+  section:
+    - Low
+    - Low/Medium
+    - Medium
+    - Medium/High
+    - High
+```
+
+Adding a header to the card
+```yaml
+- type: custom:autocolor-gauge-card
+  title: Pollen Level
+  entity: entity: sensor.allergy_index_forecasted_average
+  attribute: rating
+  header:
+    attribute: "season"
+  section:
+    - Low
+    - Low/Medium
+    - Medium
+    - Medium/High
+    - High
+```
+
+Adding a header with custom icon
+```yaml
+- type: custom:autocolor-gauge-card
+  title: Pollen Level
+  entity: entity: sensor.allergy_index_forecasted_average
+  attribute: rating
+  header:
+    attribute: "season"
+    icon: "mdi:flower-tulip"
+  section:
+    - Low
+    - Low/Medium
+    - Medium
+    - Medium/High
+    - High
+```
+
+Adding a header with no customization
+```yaml
+- type: custom:autocolor-gauge-card
+  title: Pollen Level
+  entity: entity: sensor.allergy_index_forecasted_average
+  attribute: rating
+  header: true
   section:
     - Low
     - Low/Medium

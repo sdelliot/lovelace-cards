@@ -19,8 +19,10 @@ class AutocolorGaugeCard extends HTMLElement {
     const entityParts = this._splitEntityAndAttribute(cardConfig.entity);
     cardConfig.entity = entityParts.entity;
     if (entityParts.attribute) cardConfig.attribute = entityParts.attribute;
+    this.cardConfig = cardConfig
 
     const card = document.createElement('ha-card');
+    card.setAttribute("id", "ha-card");
     const shadow = card.attachShadow({ mode: 'open' });
     const content = document.createElement('div');
     const style = document.createElement('style');
@@ -92,9 +94,52 @@ class AutocolorGaugeCard extends HTMLElement {
         padding-top: calc(var(--base-unit) * 0.15);
         font-size: calc(var(--base-unit) * 0.30);
       }
+      .flex {
+        display: flex;
+        display: -webkit-flex;
+        min-width: 0;
+      }
+      .icon {
+        display: inline-block;
+        position: relative;
+        flex: 0 0 40px;
+        width: 40px;
+        line-height: 40px;
+        text-align: center;
+        color: var(--paper-item-icon-color, #44739e);
+      }
+      .header {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        position: relative;
+        opacity: .8;
+      }
+      .name {
+        display: block;
+        display: -webkit-box;
+        font-size: 1.2rem;
+        font-weight: 500;
+        max-height: 1.4rem;
+        opacity: .75;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        word-wrap: break-word;
+        word-break; break-all;
+      }
     `;
     content.innerHTML = `
-      <div class="container">
+      <div class='flex'>
+        <div class='icon'>
+          <ha-icon id="icon"></ha-icon>
+        </div> 
+        <div class= 'header'>
+          <span class='name' id='name'></span>
+        </div>
+      </div>
+      <div class="container" id='container'>
         <div class="gauge-a"></div>
         <div class="gauge-b"></div>
         <div class="gauge-c" id="gauge"></div>
@@ -117,6 +162,28 @@ class AutocolorGaugeCard extends HTMLElement {
       }
 
       return { attribute: parts.pop(), entity: parts.join('.') };
+  }
+
+  computeIcon(entity) {
+    if (this.cardConfig.header.icon) {
+      return this.cardConfig.header.icon
+    }
+    if(entity.attributes && entity.attributes.icon){
+     return entity.attributes.icon
+    }
+    return 'mdi:help-circle'
+  }
+
+  computeName(entity, custom) {
+    if (this.cardConfig.name) {
+      return this.cardConfig.name
+    }
+    if(entity.attributes){
+      if(custom){
+        return entity.attributes[custom]
+      }
+      return entity.attributes.friendly_name
+    }
   }
 
   _fire(type, detail, options) {
@@ -321,6 +388,16 @@ class AutocolorGaugeCard extends HTMLElement {
     const root = this.shadowRoot;
     if (entityState !== this._entityState) {
       root.getElementById("title").textContent = config.title;
+      if (config.header) {
+        root.getElementById("ha-card").style.height = "calc(var(--base-unit)*3.25)";
+        root.getElementById("container").style.top = "calc(var(--base-unit)*1.9)";
+       root.getElementById("icon").icon = this.computeIcon(hass.states[config.entity]);
+        if(config.header.attribute) {
+          root.getElementById("name").textContent = this.computeName(hass.states[config.entity], config.header.attribute);
+        } else {
+          root.getElementById("name").textContent = this.computeName(hass.states[config.entity]);
+        }
+      }
       const sortable = this._getSortable(entityState, config.section, startColor, endColor);
       root.getElementById("gauge").style.backgroundColor = this._computeColor(entityState, sortable);
 
